@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Java Collections Reference</title>
+<style>
+  body { font-family: system-ui, sans-serif; background: #f9f9f7; color: #1a1a18; margin: 0; padding: 1rem; }
+  * { box-sizing: border-box; }
+  .nav { display:flex; gap:6px; flex-wrap:wrap; padding:.5rem 0 1rem; }
+  .nav button { padding:6px 14px; border-radius:8px; border:1px solid #ccc; background:transparent; cursor:pointer; font-size:13px; color:#555; }
+  .nav button.active { background:#fff; border-color:#888; color:#111; font-weight:500; }
+  .card { background:#fff; border:1px solid #e5e5e3; border-radius:12px; margin-bottom:14px; overflow:hidden; }
+  .card-head { padding:14px 16px 10px; border-bottom:1px solid #eee; display:flex; align-items:center; gap:10px; }
+  .card-head h3 { font-size:15px; font-weight:500; margin:0; }
+  .badge { font-size:11px; padding:2px 8px; border-radius:6px; }
+  .b-list { background:#E1F5EE; color:#085041; }
+  .b-set  { background:#EEEDFE; color:#3C3489; }
+  .b-map  { background:#FAEEDA; color:#633806; }
+  .b-queue{ background:#FAECE7; color:#712B13; }
+  .b-deque{ background:#FBEAF0; color:#72243E; }
+  .props { display:flex; gap:6px; flex-wrap:wrap; padding:8px 16px; border-bottom:1px solid #eee; }
+  .prop { font-size:11px; padding:2px 8px; border-radius:20px; background:#f3f3f0; color:#555; }
+  .section-label { padding:10px 16px 4px; font-size:11px; font-weight:500; color:#888; text-transform:uppercase; letter-spacing:.05em; }
+  .sections { display:grid; grid-template-columns:1fr 1fr; }
+  .sec { padding:12px 16px; border-right:1px solid #eee; }
+  .sec:last-child { border-right:none; }
+  .method-row { margin-bottom:9px; }
+  .method-name { font-family:monospace; font-size:12px; color:#111; font-weight:500; display:block; }
+  .method-desc { font-size:11px; color:#777; margin-top:1px; line-height:1.5; display:block; }
+  .iter-block { padding:12px 16px; border-top:1px solid #eee; }
+  .iter-title { font-size:11px; font-weight:500; color:#888; text-transform:uppercase; letter-spacing:.05em; margin-bottom:8px; }
+  .code { font-family:monospace; font-size:11.5px; background:#f5f5f2; border-radius:8px; padding:10px 12px; color:#111; line-height:1.7; white-space:pre; overflow-x:auto; }
+</style>
+</head>
+<body>
+
+<div class="nav" id="nav">
+  <button class="active" onclick="show('ArrayList')">ArrayList</button>
+  <button onclick="show('LinkedList')">LinkedList</button>
+  <button onclick="show('HashSet')">HashSet</button>
+  <button onclick="show('LinkedHashSet')">LinkedHashSet</button>
+  <button onclick="show('TreeSet')">TreeSet</button>
+  <button onclick="show('HashMap')">HashMap</button>
+  <button onclick="show('LinkedHashMap')">LinkedHashMap</button>
+  <button onclick="show('TreeMap')">TreeMap</button>
+  <button onclick="show('PriorityQueue')">PriorityQueue</button>
+  <button onclick="show('ArrayDeque')">ArrayDeque</button>
+</div>
+<div id="content"></div>
+
+<script>
+const data = {
+  ArrayList: {
+    type:'List', badge:'b-list',
+    props:['index-based','duplicates allowed','insertion-ordered','not thread-safe','dynamic array'],
+    crud:[
+      {n:'add(e)',d:'Appends element to end'},
+      {n:'add(i, e)',d:'Inserts at index i'},
+      {n:'set(i, e)',d:'Replaces element at index i'},
+      {n:'remove(i)',d:'Removes element at index i'},
+      {n:'remove(obj)',d:'Removes first occurrence of obj'},
+      {n:'clear()',d:'Removes all elements'},
+      {n:'addAll(c)',d:'Appends all elements of collection c'},
+      {n:'removeAll(c)',d:'Removes all elements in c'},
+      {n:'retainAll(c)',d:'Keeps only elements present in c'},
+    ],
+    lookup:[
+      {n:'get(i)',d:'Returns element at index i'},
+      {n:'size()',d:'Number of elements'},
+      {n:'contains(o)',d:'true if o is present'},
+      {n:'indexOf(o)',d:'First index of o, or -1'},
+      {n:'lastIndexOf(o)',d:'Last index of o, or -1'},
+      {n:'isEmpty()',d:'true if size is 0'},
+      {n:'subList(from,to)',d:'View of portion [from,to)'},
+      {n:'toArray()',d:'Returns Object[] of elements'},
+    ],
+    iter:`// 1. for-each
+for (String s : list) { System.out.println(s); }
+
+// 2. index-based for loop
+for (int i = 0; i < list.size(); i++) {
+    System.out.println(list.get(i));
+}
+
+// 3. Iterator (safe removal during iteration)
+Iterator<String> it = list.iterator();
+while (it.hasNext()) {
+    String s = it.next();
+    if (s.equals("remove")) it.remove();
+}
+
+// 4. ListIterator (bidirectional)
+ListIterator<String> lit = list.listIterator(list.size());
+while (lit.hasPrevious()) { System.out.println(lit.previous()); }
+
+// 5. forEach + lambda
+list.forEach(s -> System.out.println(s));
+
+// 6. Stream
+list.stream().filter(s -> s.startsWith("A")).forEach(System.out::println);`
+  },
+  LinkedList: {
+    type:'List + Deque', badge:'b-list',
+    props:['doubly-linked','duplicates allowed','insertion-ordered','also a Deque','no index lookup O(n)'],
+    crud:[
+      {n:'add(e) / addLast(e)',d:'Appends to end'},
+      {n:'addFirst(e)',d:'Inserts at beginning'},
+      {n:'add(i, e)',d:'Inserts at index i'},
+      {n:'set(i, e)',d:'Replaces element at index i'},
+      {n:'remove() / removeFirst()',d:'Removes and returns head'},
+      {n:'removeLast()',d:'Removes and returns tail'},
+      {n:'remove(i)',d:'Removes element at index i'},
+      {n:'clear()',d:'Removes all elements'},
+    ],
+    lookup:[
+      {n:'get(i)',d:'Element at index i (O(n))'},
+      {n:'getFirst() / peek()',d:'Head element, no removal'},
+      {n:'getLast() / peekLast()',d:'Tail element, no removal'},
+      {n:'contains(o)',d:'true if o is present'},
+      {n:'size()',d:'Number of elements'},
+      {n:'indexOf(o)',d:'First index of o'},
+    ],
+    iter:`// 1. for-each
+for (String s : linked) { System.out.println(s); }
+
+// 2. Iterator
+Iterator<String> it = linked.iterator();
+while (it.hasNext()) { System.out.println(it.next()); }
+
+// 3. Descending iterator (reverse)
+Iterator<String> desc = linked.descendingIterator();
+while (desc.hasNext()) { System.out.println(desc.next()); }
+
+// 4. forEach + lambda
+linked.forEach(System.out::println);
+
+// 5. Stream
+linked.stream().forEach(System.out::println);`
+  },
+  HashSet: {
+    type:'Set', badge:'b-set',
+    props:['no duplicates','no order guarantee','O(1) add/remove/contains','allows one null','backed by HashMap'],
+    crud:[
+      {n:'add(e)',d:'Adds element; returns false if duplicate'},
+      {n:'remove(o)',d:'Removes the element o'},
+      {n:'clear()',d:'Removes all elements'},
+      {n:'addAll(c)',d:'Adds all elements from collection c'},
+      {n:'removeAll(c)',d:'Removes all elements in c (difference)'},
+      {n:'retainAll(c)',d:'Keeps only elements in c (intersection)'},
+    ],
+    lookup:[
+      {n:'contains(o)',d:'true if o is in the set'},
+      {n:'size()',d:'Number of elements'},
+      {n:'isEmpty()',d:'true if size is 0'},
+      {n:'containsAll(c)',d:'true if all elements of c are present'},
+      {n:'toArray()',d:'Returns Object[] of elements'},
+    ],
+    iter:`// 1. for-each (no guaranteed order)
+for (String s : set) { System.out.println(s); }
+
+// 2. Iterator (safe removal)
+Iterator<String> it = set.iterator();
+while (it.hasNext()) {
+    if (condition) it.remove();
+    else System.out.println(it.next());
+}
+
+// 3. forEach + lambda
+set.forEach(System.out::println);
+
+// 4. Stream (add .sorted() for alphabetical order)
+set.stream().sorted().forEach(System.out::println);`
+  },
+  LinkedHashSet: {
+    type:'Set', badge:'b-set',
+    props:['no duplicates','insertion-ordered','O(1) operations','slightly slower than HashSet','allows one null'],
+    crud:[
+      {n:'add(e)',d:'Adds element maintaining insertion order'},
+      {n:'remove(o)',d:'Removes element o'},
+      {n:'clear()',d:'Removes all elements'},
+      {n:'addAll(c)',d:'Adds all elements from c'},
+      {n:'removeAll(c)',d:'Removes all elements present in c'},
+      {n:'retainAll(c)',d:'Intersection with c'},
+    ],
+    lookup:[
+      {n:'contains(o)',d:'true if o is present'},
+      {n:'size()',d:'Number of elements'},
+      {n:'isEmpty()',d:'true if empty'},
+      {n:'toArray()',d:'Returns Object[] in insertion order'},
+    ],
+    iter:`// Iteration order = insertion order
+// 1. for-each
+for (String s : lhs) { System.out.println(s); }
+
+// 2. Iterator
+Iterator<String> it = lhs.iterator();
+while (it.hasNext()) { System.out.println(it.next()); }
+
+// 3. forEach
+lhs.forEach(System.out::println);
+
+// 4. Stream
+lhs.stream().forEach(System.out::println);`
+  },
+  TreeSet: {
+    type:'Set (Sorted)', badge:'b-set',
+    props:['no duplicates','sorted order (natural/Comparator)','O(log n) operations','no null elements','implements NavigableSet'],
+    crud:[
+      {n:'add(e)',d:'Inserts element in sorted position'},
+      {n:'remove(o)',d:'Removes element o'},
+      {n:'clear()',d:'Removes all elements'},
+      {n:'addAll(c)',d:'Adds all elements from c'},
+      {n:'removeAll(c)',d:'Removes elements present in c'},
+    ],
+    lookup:[
+      {n:'contains(o)',d:'true if o is in the set'},
+      {n:'first()',d:'Smallest element'},
+      {n:'last()',d:'Largest element'},
+      {n:'floor(e)',d:'Greatest element <= e'},
+      {n:'ceiling(e)',d:'Smallest element >= e'},
+      {n:'lower(e)',d:'Greatest element < e'},
+      {n:'higher(e)',d:'Smallest element > e'},
+      {n:'headSet(e)',d:'View of elements < e'},
+      {n:'tailSet(e)',d:'View of elements >= e'},
+      {n:'subSet(from,to)',d:'View of elements in [from, to)'},
+      {n:'size()',d:'Number of elements'},
+    ],
+    iter:`// Iteration order = sorted (ascending by default)
+// 1. for-each
+for (String s : tree) { System.out.println(s); }
+
+// 2. Iterator (ascending)
+Iterator<String> it = tree.iterator();
+while (it.hasNext()) { System.out.println(it.next()); }
+
+// 3. Descending iterator
+Iterator<String> desc = tree.descendingIterator();
+while (desc.hasNext()) { System.out.println(desc.next()); }
+
+// 4. forEach
+tree.forEach(System.out::println);
+
+// 5. Range iteration
+tree.subSet("B", "F").forEach(System.out::println);`
+  },
+  HashMap: {
+    type:'Map', badge:'b-map',
+    props:['key-value pairs','no duplicate keys','no order guarantee','O(1) get/put','allows null key & values'],
+    crud:[
+      {n:'put(k, v)',d:'Associates k with v; returns old value'},
+      {n:'putIfAbsent(k, v)',d:'Puts only if k has no mapping'},
+      {n:'putAll(map)',d:'Copies all mappings from map'},
+      {n:'remove(k)',d:'Removes mapping for key k'},
+      {n:'remove(k, v)',d:'Removes only if key maps to v'},
+      {n:'replace(k, v)',d:'Replaces value for key k'},
+      {n:'replace(k, old, new)',d:'Replaces only if current value is old'},
+      {n:'clear()',d:'Removes all mappings'},
+      {n:'merge(k,v,fn)',d:'Merge or compute new value via function'},
+      {n:'compute(k, fn)',d:'Compute new value for key k'},
+      {n:'computeIfAbsent(k,fn)',d:'Compute value only if k absent'},
+    ],
+    lookup:[
+      {n:'get(k)',d:'Value for key k, or null'},
+      {n:'getOrDefault(k, def)',d:'Value for k, or def if absent'},
+      {n:'containsKey(k)',d:'true if k is a key'},
+      {n:'containsValue(v)',d:'true if v exists as a value'},
+      {n:'size()',d:'Number of key-value pairs'},
+      {n:'isEmpty()',d:'true if no mappings'},
+      {n:'keySet()',d:'Set of all keys'},
+      {n:'values()',d:'Collection of all values'},
+      {n:'entrySet()',d:'Set of Map.Entry pairs'},
+    ],
+    iter:`// 1. entrySet — most common, gives key + value
+for (Map.Entry<String,Integer> e : map.entrySet()) {
+    System.out.println(e.getKey() + " = " + e.getValue());
+}
+
+// 2. keySet — iterate keys only
+for (String key : map.keySet()) {
+    System.out.println(key + " -> " + map.get(key));
+}
+
+// 3. values — iterate values only
+for (int val : map.values()) { System.out.println(val); }
+
+// 4. forEach (Java 8+) — cleanest
+map.forEach((k, v) -> System.out.println(k + "=" + v));
+
+// 5. Stream on entrySet
+map.entrySet().stream()
+   .filter(e -> e.getValue() > 10)
+   .forEach(e -> System.out.println(e.getKey()));`
+  },
+  LinkedHashMap: {
+    type:'Map', badge:'b-map',
+    props:['key-value pairs','insertion-ordered (or access-ordered)','O(1) operations','allows null key','useful for LRU cache'],
+    crud:[
+      {n:'put(k, v)',d:'Associates k with v'},
+      {n:'putIfAbsent(k, v)',d:'Puts only if k absent'},
+      {n:'remove(k)',d:'Removes mapping for k'},
+      {n:'replace(k, v)',d:'Replaces value for k'},
+      {n:'clear()',d:'Removes all mappings'},
+    ],
+    lookup:[
+      {n:'get(k)',d:'Value for key k'},
+      {n:'getOrDefault(k, def)',d:'Value or default'},
+      {n:'containsKey(k)',d:'true if k is a key'},
+      {n:'containsValue(v)',d:'true if v is a value'},
+      {n:'size()',d:'Number of mappings'},
+      {n:'keySet()',d:'Keys in insertion order'},
+      {n:'entrySet()',d:'Entries in insertion order'},
+    ],
+    iter:`// Iteration order = insertion order
+// 1. entrySet (in insertion order)
+for (Map.Entry<String,Integer> e : lhm.entrySet()) {
+    System.out.println(e.getKey() + " = " + e.getValue());
+}
+
+// 2. forEach
+lhm.forEach((k, v) -> System.out.println(k + "=" + v));
+
+// 3. keySet in insertion order
+for (String key : lhm.keySet()) { System.out.println(key); }
+
+// Access-ordered LRU cache pattern:
+// new LinkedHashMap<>(16, 0.75f, true) {
+//     protected boolean removeEldestEntry(Map.Entry e) {
+//         return size() > MAX_SIZE;
+//     }
+// };`
+  },
+  TreeMap: {
+    type:'Map (Sorted)', badge:'b-map',
+    props:['key-value pairs','sorted by key','O(log n) operations','no null keys','implements NavigableMap'],
+    crud:[
+      {n:'put(k, v)',d:'Associates k with v in sorted order'},
+      {n:'remove(k)',d:'Removes mapping for k'},
+      {n:'replace(k, v)',d:'Replaces value for k'},
+      {n:'clear()',d:'Removes all mappings'},
+      {n:'putAll(map)',d:'Copies all mappings from map'},
+    ],
+    lookup:[
+      {n:'get(k)',d:'Value for key k'},
+      {n:'firstKey()',d:'Smallest key'},
+      {n:'lastKey()',d:'Largest key'},
+      {n:'floorKey(k)',d:'Greatest key <= k'},
+      {n:'ceilingKey(k)',d:'Smallest key >= k'},
+      {n:'lowerKey(k)',d:'Greatest key < k'},
+      {n:'higherKey(k)',d:'Smallest key > k'},
+      {n:'headMap(k)',d:'Map of entries with key < k'},
+      {n:'tailMap(k)',d:'Map of entries with key >= k'},
+      {n:'subMap(from,to)',d:'Map of entries in key range [from,to)'},
+      {n:'containsKey(k)',d:'true if k is a key'},
+      {n:'size()',d:'Number of mappings'},
+    ],
+    iter:`// Iteration order = ascending key order
+// 1. entrySet (sorted by key)
+for (Map.Entry<String,Integer> e : tm.entrySet()) {
+    System.out.println(e.getKey() + " = " + e.getValue());
+}
+
+// 2. forEach
+tm.forEach((k, v) -> System.out.println(k + "=" + v));
+
+// 3. Descending key order
+for (String k : tm.descendingKeySet()) {
+    System.out.println(k);
+}
+
+// 4. Range iteration
+tm.subMap("C", "M").forEach((k,v) -> System.out.println(k));`
+  },
+  PriorityQueue: {
+    type:'Queue', badge:'b-queue',
+    props:['min-heap by default','natural order or Comparator','O(log n) add/remove','no null elements','not FIFO — priority-based'],
+    crud:[
+      {n:'add(e) / offer(e)',d:'Inserts element; offer() returns false on fail'},
+      {n:'remove()',d:'Removes and returns head; throws if empty'},
+      {n:'poll()',d:'Removes and returns head; null if empty'},
+      {n:'remove(o)',d:'Removes specific element o'},
+      {n:'clear()',d:'Removes all elements'},
+    ],
+    lookup:[
+      {n:'peek()',d:'Returns head without removing; null if empty'},
+      {n:'element()',d:'Returns head; throws if empty'},
+      {n:'contains(o)',d:'true if o is present'},
+      {n:'size()',d:'Number of elements'},
+      {n:'isEmpty()',d:'true if empty'},
+      {n:'toArray()',d:'Snapshot array (not in sorted order)'},
+    ],
+    iter:`// WARNING: for-each does NOT give priority order.
+// It gives internal heap-array order.
+
+// 1. Drain by polling (true priority order)
+PriorityQueue<Integer> copy = new PriorityQueue<>(pq);
+while (!copy.isEmpty()) {
+    System.out.println(copy.poll());
+}
+
+// 2. for-each (heap order, not sorted)
+for (int x : pq) { System.out.println(x); }
+
+// 3. Iterator (heap order)
+Iterator<Integer> it = pq.iterator();
+while (it.hasNext()) { System.out.println(it.next()); }
+
+// 4. Stream with sorted() for priority order
+pq.stream().sorted().forEach(System.out::println);`
+  },
+  ArrayDeque: {
+    type:'Deque', badge:'b-deque',
+    props:['double-ended queue','no null elements','faster than Stack & LinkedList','not thread-safe','O(1) add/remove at both ends'],
+    crud:[
+      {n:'addFirst(e) / offerFirst(e)',d:'Inserts at front'},
+      {n:'addLast(e) / offerLast(e)',d:'Inserts at back'},
+      {n:'add(e)',d:'Inserts at back (Queue mode)'},
+      {n:'push(e)',d:'Inserts at front (Stack mode)'},
+      {n:'removeFirst() / poll()',d:'Removes and returns front'},
+      {n:'removeLast() / pollLast()',d:'Removes and returns back'},
+      {n:'pop()',d:'Removes front (Stack mode)'},
+      {n:'remove(o)',d:'Removes first occurrence of o'},
+      {n:'clear()',d:'Removes all elements'},
+    ],
+    lookup:[
+      {n:'peekFirst() / peek()',d:'Front element; null if empty'},
+      {n:'peekLast()',d:'Back element; null if empty'},
+      {n:'getFirst()',d:'Front element; throws if empty'},
+      {n:'getLast()',d:'Back element; throws if empty'},
+      {n:'contains(o)',d:'true if o is present'},
+      {n:'size()',d:'Number of elements'},
+      {n:'isEmpty()',d:'true if empty'},
+    ],
+    iter:`// 1. for-each (front to back)
+for (String s : deque) { System.out.println(s); }
+
+// 2. Iterator (front to back)
+Iterator<String> it = deque.iterator();
+while (it.hasNext()) { System.out.println(it.next()); }
+
+// 3. Descending iterator (back to front)
+Iterator<String> desc = deque.descendingIterator();
+while (desc.hasNext()) { System.out.println(desc.next()); }
+
+// 4. forEach
+deque.forEach(System.out::println);
+
+// 5. Stream
+deque.stream().forEach(System.out::println);`
+  }
+};
+
+function show(name) {
+  document.querySelectorAll('.nav button').forEach(b => {
+    b.classList.toggle('active', b.textContent.trim() === name);
+  });
+  const d = data[name];
+  const midC = Math.ceil(d.crud.length/2);
+  const midL = Math.ceil(d.lookup.length/2);
+  function rows(arr) {
+    return arr.map(m=>`<div class="method-row"><span class="method-name">${m.n}</span><span class="method-desc">${m.d}</span></div>`).join('');
+  }
+  document.getElementById('content').innerHTML = `
+    <div class="card">
+      <div class="card-head">
+        <h3>${name}</h3>
+        <span class="badge ${d.badge}">${d.type}</span>
+      </div>
+      <div class="props">${d.props.map(p=>`<span class="prop">${p}</span>`).join('')}</div>
+      <div class="section-label">CRUD methods</div>
+      <div class="sections">
+        <div class="sec">${rows(d.crud.slice(0,midC))}</div>
+        <div class="sec">${rows(d.crud.slice(midC))}</div>
+      </div>
+      <div class="section-label" style="border-top:1px solid #eee;padding-top:10px">Lookup methods</div>
+      <div class="sections">
+        <div class="sec">${rows(d.lookup.slice(0,midL))}</div>
+        <div class="sec">${rows(d.lookup.slice(midL))}</div>
+      </div>
+      <div class="iter-block">
+        <div class="iter-title">Iteration patterns</div>
+        <div class="code">${d.iter}</div>
+      </div>
+    </div>`;
+}
+show('ArrayList');
+</script>
+</body>
+</html>
