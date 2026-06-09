@@ -1,0 +1,60 @@
+. Remove .metadata 
+
+
+. initialize git repo
+	git init
+. rename 'master' to 'main'
+	git branch -m master main
+. add gitignore
+	touch .gitignore
+. copy & paste the .gitignore content
+. add files
+	git add .
+. Commit your code
+	git commit -m "final version"
+. Add remote repository (GitHub/GitLab)
+	git remote add origin https://github.com/username/repo.git
+. Push your code to main
+	git push -u origin main
+. If it doesn't work - to reset the credentials:
+	windows start -> credentials manager -> windows credentials -> delete anything releted to github and try again
+
+
+
+
+.git ignore file:
+
+# =========================
+# ✅ Java / Maven
+# =========================
+target/
+*.jar
+*.war
+*.class
+
+# =========================
+# ✅ Eclipse / IDE files
+# =========================
+.classpath
+.project
+.settings/
+.factorypath
+
+# =========================
+# ✅ Node (frontend)
+# =========================
+node_modules/
+build/
+dist/
+
+# =========================
+# ✅ Environment & logs
+# =========================
+.env
+*.log
+
+# =========================
+# ✅ OS files
+# =========================
+.DS_Store
+Thumbs.db
