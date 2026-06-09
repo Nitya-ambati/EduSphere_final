@@ -1,0 +1,34 @@
+# =========================
+# ✅ Java / Maven
+# =========================
+target/
+*.jar
+*.war
+*.class
+
+# =========================
+# ✅ Eclipse / IDE files
+# =========================
+.classpath
+.project
+.settings/
+.factorypath
+
+# =========================
+# ✅ Node (frontend)
+# =========================
+node_modules/
+build/
+dist/
+
+# =========================
+# ✅ Environment & logs
+# =========================
+.env
+*.log
+
+# =========================
+# ✅ OS files
+# =========================
+.DS_Store
+Thumbs.db

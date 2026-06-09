@@ -1,0 +1,190 @@
+@startuml EduSphere_Architecture
+
+!theme plain
+top to bottom direction
+
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam nodesep 55
+skinparam ranksep 50
+
+skinparam actor {
+    BackgroundColor #D6EAF8
+    BorderColor     #2874A6
+    FontStyle       bold
+}
+
+skinparam rectangle {
+    BackgroundColor #FDFEFE
+    BorderColor     #5D6D7E
+    BorderThickness 1.5
+    RoundCorner     10
+}
+
+skinparam database {
+    BackgroundColor #FEF9E7
+    BorderColor     #D4AC0D
+    BorderThickness 1.5
+}
+
+skinparam package {
+    BackgroundColor #F4F6F7
+    BorderColor     #AAB7B8
+    BorderThickness 1.2
+    RoundCorner     8
+    FontStyle       bold
+}
+
+skinparam cloud {
+    BackgroundColor #F0ECF8
+    BorderColor     #7D3C98
+    BorderThickness 1.5
+}
+
+title EduSphere - Microservices Architecture\nSpring Boot 3.3.5  |  Spring Cloud 2023.0.3  |  Java 21
+
+
+'================================================
+' LAYER 1 - CLIENTS
+'================================================
+package "Client Layer" {
+    actor "Student"     as STU
+    actor "Instructor"  as INS
+    actor "Coordinator" as COR
+    actor "Admin"       as ADM
+}
+
+
+'================================================
+' LAYER 2 - INFRASTRUCTURE
+'================================================
+cloud "Eureka Server\n:8761\nService Registry" as EUREKA
+
+rectangle "API Gateway  :9090\n\n1. Validates JWT (HS256 signature + expiry)\n2. Checks consentAccepted JWT claim -> 403 if false\n3. Strips Authorization header\n4. Injects X-User-Id, X-User-Role, X-User-Email\n5. Routes request to downstream service" as GW #D6EAF8
+
+
+'================================================
+' LAYER 3 - MICROSERVICES
+'================================================
+package "Core Services  (each has: GatewayHeaderAuthFilter + ServiceAuthFilter + JwtAuthFilter)" as CORE {
+
+    rectangle "IAM Service  :8081\n---------------------------------\nPOST   /api/v1/auth/login\nPOST   /api/v1/auth/refresh\nPOST   /api/v1/auth/logout\nPATCH  /api/v1/auth/consent\nPOST   /api/v1/admin/users/upload\nGET    /api/v1/admin/users\nDELETE /api/v1/admin/users/{id}" as IAM #E8F8F5
+
+    rectangle "Course Service  :8082\n---------------------------------\nGET    /api/v1/courses\nPOST   /api/v1/courses/{id}/departments/{deptId}\nDELETE /api/v1/courses/{id}/departments/{deptId}\nGET    /api/v1/courses/{id}/departments\nPOST   /api/v1/courses/{id}/content  [upload]\nPOST   /api/v1/courses/{id}/content/{cid}/complete\nGET    /api/v1/courses/{id}/progress" as COURSE #E8F8F5
+
+    rectangle "Enrollment Service  :8083\n---------------------------------\nPOST  /api/v1/enrollments\nGET   /api/v1/enrollments\nDELETE /api/v1/enrollments/{id}\nGET   /api/v1/enrollments/students/me\nGET   /api/v1/enrollments/instructors/{id}\nGET   /api/v1/enrollments/check" as ENROLL #E8F8F5
+
+    rectangle "Assignment Service  :8084\n---------------------------------\nPOST /api/v1/courses/{id}/assignments\nPOST /api/v1/courses/{id}/assignments/upload\nGET  /api/v1/assignments/{id}\nPOST /api/v1/assignments/{id}/submit\nGET  /api/v1/assignments/{id}/submissions\nGET  /api/v1/assignments/{id}/attempt-status\nGET  /api/v1/students/{id}/progress" as ASSIGN #E8F8F5
+
+}
+
+package "Support Services" as SUPPORT {
+
+    rectangle "Notification Service  :8085\n---------------------------------\nGET   /api/v1/notifications\nGET   /api/v1/notifications/count\nPATCH /api/v1/notifications/{id}/read\nPOST  /api/v1/notifications/preferences\nGET   /api/v1/notifications/preferences\nPOST  /api/v1/notifications/dispatch\nPOST  /api/v1/notifications/course-completion  [SERVICE]" as NOTIF #FEF9E7
+
+    rectangle "Audit Service  :8086\n---------------------------------\nPOST /api/v1/audit/logs  [SERVICE]\nGET  /api/v1/audit/logs  [ADMIN]\nGET  /api/v1/audit/logs/{id}  [ADMIN]\nPOST /api/v1/audit/logs/export  [ADMIN]\nGET  /api/v1/compliance/reports\nGET  /api/v1/gdpr/requests" as AUDIT #FEF9E7
+
+    rectangle "Analytics Service  :8088\n---------------------------------\nPOST /api/v1/analytics/progress  [SERVICE]\nGET  /api/v1/analytics/progress/student/{id}\nGET  /api/v1/analytics/progress/course/{id}\nGET  /api/v1/analytics/progress/student/{sid}/course/{cid}\nGET  /api/v1/analytics/kpis\nPOST /api/v1/reports\nGET  /api/v1/reports/{id}" as ANALYTICS #FEF9E7
+
+}
+
+
+'================================================
+' LAYER 4 - DATABASES
+'================================================
+package "Data Layer  (one MySQL database per service)" as DATA {
+    database "edusphere_iam"           as DB_IAM
+    database "edusphere_courses"       as DB_COURSE
+    database "edusphere_enrollment"    as DB_ENROLL
+    database "edusphere_assignments"   as DB_ASSIGN
+    database "edusphere_notifications" as DB_NOTIF
+    database "edusphere_audit"         as DB_AUDIT
+    database "edusphere_analytics"     as DB_ANALYTICS
+}
+
+
+'================================================
+' ARROWS 1 - Clients to Gateway
+'================================================
+STU -[#2874A6]-> GW : HTTPS + Bearer JWT
+INS -[#2874A6]-> GW : HTTPS + Bearer JWT
+COR -[#2874A6]-> GW : HTTPS + Bearer JWT
+ADM -[#2874A6]-> GW : HTTPS + Bearer JWT
+
+
+'================================================
+' ARROWS 2 - Gateway to Services
+'================================================
+GW -[#1A5276]-> IAM       : /auth/**  /admin/**
+GW -[#1A5276]-> COURSE    : /courses/**
+GW -[#1A5276]-> ENROLL    : /enrollments/**
+GW -[#1A5276]-> ASSIGN    : /assignments/**  /submissions/**
+GW -[#1A5276]-> NOTIF     : /notifications/**
+GW -[#1A5276]-> AUDIT     : /audit/**
+GW -[#1A5276]-> ANALYTICS : /analytics/**  /reports/**
+
+
+'================================================
+' ARROWS 3 - Eureka Registration
+'================================================
+GW        .[#7D3C98].> EUREKA : discover
+IAM       .[#7D3C98].> EUREKA : register
+COURSE    .[#7D3C98].> EUREKA : register
+ENROLL    .[#7D3C98].> EUREKA : register
+ASSIGN    .[#7D3C98].> EUREKA : register
+NOTIF     .[#7D3C98].> EUREKA : register
+AUDIT     .[#7D3C98].> EUREKA : register
+ANALYTICS .[#7D3C98].> EUREKA : register
+
+
+'================================================
+' ARROWS 4 - Inter-Service Feign Calls
+'================================================
+IAM       -[#E74C3C,dashed]-> AUDIT     : USER_LOGIN, CONSENT_ACCEPTED, USER_DELETED
+
+ENROLL    -[#E74C3C,dashed]-> IAM       : getUser  (validate dept)
+ENROLL    -[#E74C3C,dashed]-> COURSE    : getCourse, getCourseDepartments
+ENROLL    -[#E74C3C,dashed]-> AUDIT     : USER_ENROLLED
+
+COURSE    -[#E74C3C,dashed]-> ENROLL    : isEnrolled  (instructor upload guard)
+COURSE    -[#E74C3C,dashed]-> ANALYTICS : CONTENT_COMPLETED, COURSE_COMPLETED
+COURSE    -[#E74C3C,dashed]-> NOTIF     : course-completion email
+COURSE    -[#E74C3C,dashed]-> AUDIT     : content events
+
+ASSIGN    -[#E74C3C,dashed]-> ENROLL    : isEnrolled  (student + instructor guard)
+ASSIGN    -[#E74C3C,dashed]-> COURSE    : getCourse  (validate active)
+ASSIGN    -[#E74C3C,dashed]-> ANALYTICS : ASSIGNMENT_SUBMITTED
+ASSIGN    -[#E74C3C,dashed]-> AUDIT     : ASSIGNMENT_CREATED, ASSIGNMENT_SUBMITTED
+ASSIGN    -[#E74C3C,dashed]-> NOTIF     : dispatch notification
+
+NOTIF     -[#E74C3C,dashed]-> IAM       : getUser  (resolve email)
+
+ANALYTICS -[#E74C3C,dashed]-> COURSE    : getAllCourses  (KPI count)
+
+
+'================================================
+' ARROWS 5 - Services to Databases
+'================================================
+IAM       -[#D4AC0D]-> DB_IAM
+COURSE    -[#D4AC0D]-> DB_COURSE
+ENROLL    -[#D4AC0D]-> DB_ENROLL
+ASSIGN    -[#D4AC0D]-> DB_ASSIGN
+NOTIF     -[#D4AC0D]-> DB_NOTIF
+AUDIT     -[#D4AC0D]-> DB_AUDIT
+ANALYTICS -[#D4AC0D]-> DB_ANALYTICS
+
+
+'================================================
+' LEGEND
+'================================================
+legend bottom
+    |=       Arrow Style        |=             Meaning                         |
+    | <color:#2874A6>solid blue</color>   | Client to Gateway  (HTTPS + Bearer JWT)    |
+    | <color:#1A5276>solid dark</color>   | Gateway to Service  (X-User-* headers)     |
+    | <color:#7D3C98>dotted purple</color>| Eureka  register / discover                |
+    | <color:#E74C3C>red dashed</color>   | Feign call  (X-Service-Key header)         |
+    | <color:#D4AC0D>gold solid</color>   | JPA / Hibernate  to MySQL                  |
+endlegend
+
+@enduml

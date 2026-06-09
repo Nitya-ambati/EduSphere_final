@@ -1,0 +1,106 @@
+server:
+  port: 9091
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins:
+              - "http://localhost:3000"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - PATCH
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+            allowCredentials: true
+            maxAge: 3600
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      routes:
+        # IAM Service
+        - id: iam-service
+          uri: lb://iam-service
+          predicates:
+            - Path=/api/v1/auth/**, /api/v1/users/**, /api/v1/admin/**
+
+        # Coordinator/Admin supervisor assignment routes (no enrollment check)
+        # MUST be listed BEFORE course-service routes
+        - id: coordinator-assignment-routes
+          uri: lb://assignment-service
+          predicates:
+            - Path=/api/v1/coordinator/courses/*/assignments, /api/v1/coordinator/courses/*/assignments/**
+
+        # Assignment-service routes for course-scoped assignment endpoints
+        # MUST be listed BEFORE course-service to avoid /api/v1/courses/** swallowing them
+        - id: assignment-course-routes
+          uri: lb://assignment-service
+          predicates:
+            - Path=/api/v1/courses/*/assignments, /api/v1/courses/*/assignments/**
+
+        # Course Service (general course + department endpoints)
+        - id: course-service
+          uri: lb://course-service
+          predicates:
+            - Path=/api/v1/courses/**, /api/v1/departments/**
+
+        # Enrollment Service
+        - id: enrollment-service
+          uri: lb://enrollment-service
+          predicates:
+            - Path=/api/v1/enrollments/**, /api/v1/students/*/enrollments/**, /api/v1/instructors/*/enrollments/**
+
+        # Assignment Service (direct assignment/submission endpoints)
+        - id: assignment-service
+          uri: lb://assignment-service
+          predicates:
+            - Path=/api/v1/assignments/**, /api/v1/submissions/**
+
+        # Student progress (assignment-service)
+        - id: progress-service
+          uri: lb://assignment-service
+          predicates:
+            - Path=/api/v1/students/*/progress, /api/v1/students/*/progress/**
+
+        # Notification Service
+        - id: notification-service
+          uri: lb://notification-service
+          predicates:
+            - Path=/api/v1/notifications/**
+
+        # Analytics Service
+        - id: analytics-service
+          uri: lb://analytics-service
+          predicates:
+            - Path=/api/v1/analytics/**, /api/v1/reports/**
+
+        # Audit Service
+        - id: audit-service
+          uri: lb://audit-service
+          predicates:
+            - Path=/api/v1/audit/**, /api/v1/compliance/**, /api/v1/gdpr/**
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+
+app:
+  jwt:
+    secret: edusphere-jwt-secret-key-must-be-at-least-256-bits-long-for-hs256-algorithm
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,routes

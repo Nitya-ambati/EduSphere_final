@@ -1,0 +1,29 @@
+server:
+  port: 8083
+spring:
+  application:
+    name: enrollment-service
+  datasource:
+    url: jdbc:mysql://localhost:3306/edusphere_enrollment?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: root
+    password: root
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+app:
+  jwt:
+    secret: edusphere-jwt-secret-key-must-be-at-least-256-bits-long-for-hs256-algorithm
+  service:
+    secret: edusphere-internal-svc-2026
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html

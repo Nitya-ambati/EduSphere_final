@@ -1,0 +1,220 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg-base: #f5f3ff;
+    --bg-card: #ffffff;
+    --bg-sidebar: #ffffff;
+    --border: #e2e8f0;
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --text-muted: #94a3b8;
+    --scrollbar: #c4b5fd;
+  }
+
+  .dark {
+    --bg-base: #0f0f1a;
+    --bg-card: #1a1a2e;
+    --bg-sidebar: #16162a;
+    --border: #2d2d4e;
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --scrollbar: #4c1d95;
+  }
+
+  body {
+    background-color: var(--bg-base);
+    color: var(--text-primary);
+    @apply font-sans antialiased;
+  }
+
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { @apply bg-transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--scrollbar); @apply rounded-full; }
+  ::-webkit-scrollbar-thumb:hover { @apply bg-primary-400; }
+}
+
+@layer components {
+  /* ── Buttons ─────────────────────────────────────────── */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl
+           bg-primary-600 text-white font-semibold text-sm
+           shadow-sm hover:bg-primary-700 active:scale-95
+           transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl
+           bg-white dark:bg-slate-800 text-primary-700 dark:text-primary-300
+           font-semibold text-sm border border-primary-200 dark:border-slate-600
+           shadow-sm hover:bg-primary-50 dark:hover:bg-slate-700
+           active:scale-95 transition-all duration-150;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl
+           text-slate-600 dark:text-slate-300 font-medium text-sm
+           hover:bg-slate-100 dark:hover:bg-slate-700
+           active:scale-95 transition-all duration-150;
+  }
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl
+           bg-rose-500 text-white font-semibold text-sm
+           shadow-sm hover:bg-rose-600 active:scale-95 transition-all duration-150;
+  }
+
+  /* ── Cards ───────────────────────────────────────────── */
+  .card {
+    background-color: var(--bg-card);
+    border-color: var(--border);
+    @apply rounded-2xl shadow-card border p-6;
+  }
+  .card-hover {
+    @apply card hover:shadow-soft transition-all duration-200 cursor-pointer;
+  }
+
+  /* ── Form elements ───────────────────────────────────── */
+  .input {
+    @apply w-full px-4 py-2.5 rounded-xl border text-sm placeholder:text-slate-400
+           focus:outline-none focus:ring-2 focus:ring-primary-300 focus:border-primary-400
+           transition-all duration-150;
+    background-color: var(--bg-card);
+    border-color: var(--border);
+    color: var(--text-primary);
+  }
+  .label {
+    @apply block text-sm font-medium mb-1.5;
+    color: var(--text-secondary);
+  }
+
+  /* ── Badges ──────────────────────────────────────────── */
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold;
+  }
+
+  /* ── Sidebar ─────────────────────────────────────────── */
+  .sidebar-link {
+    @apply flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm
+           hover:bg-primary-50 dark:hover:bg-primary-900/30
+           hover:text-primary-700 dark:hover:text-primary-300
+           transition-all duration-150 cursor-pointer;
+    color: var(--text-secondary);
+  }
+  .sidebar-link.active {
+    @apply bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300;
+  }
+
+  /* ── Typography ──────────────────────────────────────── */
+  .page-title {
+    @apply text-2xl font-bold;
+    color: var(--text-primary);
+  }
+  .section-title {
+    @apply text-lg font-semibold;
+    color: var(--text-primary);
+  }
+
+  /* ── Tab selectors ───────────────────────────────────── */
+  .tab-bar {
+    @apply flex gap-1 p-1 rounded-xl w-fit;
+    background-color: var(--border);
+  }
+  .tab-btn {
+    @apply px-4 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5;
+    color: var(--text-muted);
+  }
+  .tab-btn:hover {
+    color: var(--text-primary);
+  }
+  .tab-btn.active {
+    background-color: var(--bg-card);
+    @apply text-primary-700 dark:text-primary-300 shadow-sm;
+  }
+
+  /* ── Stat card gradient accent ───────────────────────── */
+  .stat-accent-0 { @apply bg-gradient-to-br from-primary-500 to-purple-600; }
+  .stat-accent-1 { @apply bg-gradient-to-br from-emerald-500 to-teal-600; }
+  .stat-accent-2 { @apply bg-gradient-to-br from-amber-500 to-orange-500; }
+  .stat-accent-3 { @apply bg-gradient-to-br from-rose-500 to-pink-600; }
+  .stat-accent-4 { @apply bg-gradient-to-br from-cyan-500 to-blue-600; }
+  .stat-accent-5 { @apply bg-gradient-to-br from-fuchsia-500 to-violet-600; }
+}
+
+/* ── Global dark mode overrides ─────────────────────────────
+   Converts all hardcoded slate/white utility classes so every
+   component automatically adapts to dark mode without needing
+   per-file edits.
+   ─────────────────────────────────────────────────────────── */
+.dark .text-slate-900,
+.dark .text-slate-800 { color: var(--text-primary) !important; }
+.dark .text-slate-700,
+.dark .text-slate-600 { color: var(--text-secondary) !important; }
+.dark .text-slate-500,
+.dark .text-slate-400,
+.dark .text-slate-300 { color: var(--text-muted) !important; }
+
+.dark .bg-white { background-color: var(--bg-card) !important; }
+.dark .bg-slate-50 { background-color: var(--bg-base) !important; }
+.dark .bg-slate-100 { background-color: var(--bg-sidebar) !important; }
+.dark .bg-slate-200 { background-color: var(--border) !important; }
+
+.dark .border-slate-50,
+.dark .border-slate-100,
+.dark .border-slate-200 { border-color: var(--border) !important; }
+
+.dark .hover\:bg-slate-50:hover { background-color: rgba(255,255,255,0.04) !important; }
+.dark .hover\:bg-slate-100:hover { background-color: rgba(255,255,255,0.08) !important; }
+.dark .hover\:bg-amber-50:hover { background-color: rgba(245,158,11,0.12) !important; }
+.dark .hover\:bg-amber-100:hover { background-color: rgba(245,158,11,0.18) !important; }
+.dark .hover\:bg-rose-50:hover { background-color: rgba(244,63,94,0.1) !important; }
+.dark .hover\:bg-emerald-50:hover { background-color: rgba(16,185,129,0.1) !important; }
+.dark .hover\:bg-emerald-100:hover { background-color: rgba(16,185,129,0.15) !important; }
+.dark .hover\:bg-blue-50:hover { background-color: rgba(59,130,246,0.1) !important; }
+
+/* Inline coloured indicator panels */
+.dark .bg-amber-50 { background-color: rgba(245,158,11,0.12) !important; }
+.dark .bg-rose-50  { background-color: rgba(244,63,94,0.1)   !important; }
+.dark .bg-emerald-50 { background-color: rgba(16,185,129,0.1) !important; }
+.dark .bg-blue-50  { background-color: rgba(59,130,246,0.1)  !important; }
+.dark .bg-amber-100 { background-color: rgba(245,158,11,0.2) !important; }
+.dark .bg-rose-100  { background-color: rgba(244,63,94,0.15) !important; }
+.dark .bg-emerald-100 { background-color: rgba(16,185,129,0.15) !important; }
+.dark .bg-blue-100  { background-color: rgba(59,130,246,0.15) !important; }
+
+/* Borders on indicator panels */
+.dark .border-amber-200 { border-color: rgba(245,158,11,0.35) !important; }
+.dark .border-rose-100,
+.dark .border-rose-200  { border-color: rgba(244,63,94,0.3)   !important; }
+.dark .border-emerald-100,
+.dark .border-emerald-200 { border-color: rgba(16,185,129,0.3) !important; }
+.dark .border-blue-100,
+.dark .border-blue-200  { border-color: rgba(59,130,246,0.3)  !important; }
+
+/* Primary / violet / purple light backgrounds (e.g. primary-50, purple-50) */
+.dark .bg-primary-50,
+.dark .bg-violet-50    { background-color: rgba(139,92,246,0.08)  !important; }
+.dark .bg-primary-100,
+.dark .bg-violet-100   { background-color: rgba(139,92,246,0.15)  !important; }
+.dark .bg-purple-50    { background-color: rgba(168,85,247,0.08)  !important; }
+.dark .bg-purple-100   { background-color: rgba(168,85,247,0.15)  !important; }
+.dark .bg-indigo-50    { background-color: rgba(99,102,241,0.08)  !important; }
+.dark .bg-indigo-100   { background-color: rgba(99,102,241,0.15)  !important; }
+.dark .bg-sky-50       { background-color: rgba(14,165,233,0.08)  !important; }
+.dark .bg-sky-100      { background-color: rgba(14,165,233,0.15)  !important; }
+.dark .bg-cyan-50      { background-color: rgba(6,182,212,0.08)   !important; }
+.dark .bg-cyan-100     { background-color: rgba(6,182,212,0.15)   !important; }
+
+/* Primary / violet borders */
+.dark .border-primary-100,
+.dark .border-violet-100  { border-color: rgba(139,92,246,0.25) !important; }
+.dark .border-primary-200,
+.dark .border-violet-200  { border-color: rgba(139,92,246,0.35) !important; }
+.dark .border-purple-100,
+.dark .border-purple-200  { border-color: rgba(168,85,247,0.3)  !important; }
+.dark .border-indigo-100,
+.dark .border-indigo-200  { border-color: rgba(99,102,241,0.3)  !important; }
+
+/* Primary text in dark mode — ensure readability against dark cards */
+.dark .text-primary-800,
+.dark .text-primary-900 { color: #a78bfa !important; }
